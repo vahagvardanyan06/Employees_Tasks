@@ -65,17 +65,18 @@ const Employees = () => {
       const response = await fetch(`${employeesUrl}/${id}`, {
         method: "DELETE",
       });
-
+  
       if (response.ok) {
         // Employee deleted successfully, fetch updated data
         fetchData();
       } else {
-        console.log('Error deleting employee:', response.status);
+        console.log("Error deleting employee:", response.status);
       }
     } catch (error) {
-      console.log('Error deleting employee:', error);
+      console.log("Error deleting employee:", error);
     }
   };
+  
 
   const handleUpdate = async (id, updatedData) => {
     try {

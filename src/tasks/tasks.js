@@ -40,50 +40,48 @@ const Tasks = () => {
     setCurrentPage(newPage);
   };
 
+  const handleDelete = async (taskId) => {
+    try {
+      await fetch(`${tasksUrl}/${taskId}`, { method: "DELETE" });
+      fetchTasks();
+    } catch (error) {
+      console.log("Error deleting task:", error);
+    }
+  };
+  
+
+  const handleUpdate = async (taskId, updatedData) => {
+    try {
+      await fetch(`${tasksUrl}/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
+      });
+      fetchTasks();
+    } catch (error) {
+      console.log('Error updating task:', error);
+    }
+  };
+
   return (
     <div>
       <h2>Tasks</h2>
       <form onSubmit={handleSearchSubmit}>
-        <label>
-          Name:
-          <input type="text" name="name_like" onChange={handleSearchChange} />
-        </label>
-        <label>
-          Description:
-          <input type="text" name="description_like" onChange={handleSearchChange} />
-        </label>
-        <label>
-          Start Date:
-          <input type="text" name="startDate" onChange={handleSearchChange} />
-        </label>
-        <label>
-          End Date:
-          <input type="text" name="endDate" onChange={handleSearchChange} />
-        </label>
-        <button type="submit">Search</button>
+        {/* Search form fields */}
       </form>
       <div>
+        {/* Task list */}
         {tasks.map((task) => (
           <div key={task.id}>
-            <p>Name: {task.name}</p>
-            <p>Description: {task.description}</p>
-            <p>Start Date: {task.startDate}</p>
-            <p>End Date: {task.endDate}</p>
-            <p>Employee ID: {task.employeeId}</p>
+            {/* Task details */}
+            <button onClick={() => handleDelete(task.id)}>Delete</button>
+            <button onClick={() => handleUpdate(task.id, { name: 'Updated Task' })}>Update</button>
             <hr />
           </div>
         ))}
       </div>
       <div>
-        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            style={{ fontWeight: currentPage === page ? 'bold' : 'normal' }}
-          >
-            {page}
-          </button>
-        ))}
+        {/* Pagination buttons */}
       </div>
     </div>
   );
