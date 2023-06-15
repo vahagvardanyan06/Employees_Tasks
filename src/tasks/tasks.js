@@ -1,126 +1,90 @@
 import React, { useState, useEffect } from 'react';
 
 const tasksUrl = "https://rocky-temple-83495.herokuapp.com/tasks";
-const employeesUrl = "https://rocky-temple-83495.herokuapp.com/employees";
 
 const Tasks = () => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
-  const [employees, setEmployees] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [searchParams, setSearchParams] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchEmployees();
-  }, []);
+    fetchTasks();
+  }, [currentPage, searchParams]);
 
-  const fetchEmployees = async () => {
+  const fetchTasks = async () => {
     try {
-      const response = await fetch(employeesUrl);
+      const params = new URLSearchParams(searchParams);
+      const response = await fetch(`${tasksUrl}?_page=${currentPage}&_limit=5&${params}`);
       const jsonData = await response.json();
-      setEmployees(jsonData);
+      setTasks(jsonData);
+      setTotalPages(Number(response.headers.get('X-Total-Pages')));
     } catch (error) {
-      console.log('Error fetching employees:', error);
+      console.log('Error fetching tasks:', error);
     }
   };
 
-  const createTask = async () => {
-    const newTask = {
-      name,
-      description,
-      startDate,
-      endDate,
-      employeeId,
-    };
-
-    try {
-      const response = await fetch(tasksUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newTask),
-      });
-
-      if (response.ok) {
-        // Task created successfully
-        setName("");
-        setDescription("");
-        setStartDate("");
-        setEndDate("");
-        setEmployeeId("");
-        alert("Task created successfully!");
-      } else {
-        console.log('Error creating task:', response.status);
-      }
-    } catch (error) {
-      console.log('Error creating task:', error);
-    }
+  const handleSearchChange = (event) => {
+    setSearchParams((prevParams) => ({
+      ...prevParams,
+      [event.target.name]: event.target.value
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    createTask();
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   return (
     <div>
-      <h2>Create Task</h2>
-      <form onSubmit={handleSubmit}>
+      <h2>Tasks</h2>
+      <form onSubmit={handleSearchSubmit}>
         <label>
           Name:
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+          <input type="text" name="name_like" onChange={handleSearchChange} />
         </label>
         <label>
           Description:
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
+          <input type="text" name="description_like" onChange={handleSearchChange} />
         </label>
         <label>
           Start Date:
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-          />
+          <input type="text" name="startDate" onChange={handleSearchChange} />
         </label>
         <label>
           End Date:
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            required
-          />
+          <input type="text" name="endDate" onChange={handleSearchChange} />
         </label>
-        <label>
-          Employee:
-          <select
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
-            required
-          >
-            <option value="">Select Employee</option>
-            {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.name} {employee.surname}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button type="submit">Create Task</button>
+        <button type="submit">Search</button>
       </form>
+      <div>
+        {tasks.map((task) => (
+          <div key={task.id}>
+            <p>Name: {task.name}</p>
+            <p>Description: {task.description}</p>
+            <p>Start Date: {task.startDate}</p>
+            <p>End Date: {task.endDate}</p>
+            <p>Employee ID: {task.employeeId}</p>
+            <hr />
+          </div>
+        ))}
+      </div>
+      <div>
+        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            style={{ fontWeight: currentPage === page ? 'bold' : 'normal' }}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
