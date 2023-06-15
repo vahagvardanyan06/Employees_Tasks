@@ -23,9 +23,7 @@ const Employees = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const createEmployee = async () => {
     const newEmployee = {
       name,
       surname,
@@ -43,10 +41,9 @@ const Employees = () => {
       });
 
       if (response.ok) {
-        // Employee created successfully, fetch updated data
-        fetchData();
-        // Reset form fields
-        setName("");
+        // Employee created successfully
+        fetchData(); // Refresh the employee list
+        setName(""); // Reset form input fields
         setSurname("");
         setEmail("");
         setPosition("");
@@ -58,143 +55,79 @@ const Employees = () => {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    createEmployee();
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${employeesUrl}/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Employee deleted successfully, fetch updated data
+        fetchData();
+      } else {
+        console.log('Error deleting employee:', response.status);
+      }
+    } catch (error) {
+      console.log('Error deleting employee:', error);
+    }
+  };
+
   return (
     <div>
-      <div>
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Name:
           <input
             type="text"
-            placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
+        </label>
+        <label>
+          Surname:
           <input
             type="text"
-            placeholder="Surname"
             value={surname}
             onChange={(e) => setSurname(e.target.value)}
+            required
           />
+        </label>
+        <label>
+          Email:
           <input
             type="email"
-            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
+        </label>
+        <label>
+          Position:
           <input
             type="text"
-            placeholder="Position"
             value={position}
             onChange={(e) => setPosition(e.target.value)}
+            required
           />
-          <button type="submit">Create Employee</button>
-        </form>
+        </label>
+        <button type="submit">Create Employee</button>
+      </form>
+      <div>
+        {data.map((employee) => (
+          <div key={employee.id}>
+            <span>{employee.name} {employee.surname}</span>
+            <button onClick={() => handleDelete(employee.id)}>Delete</button>
+          </div>
+        ))}
       </div>
-      {data.map((item) => (
-        <div key={item.id}>{item.name}</div>
-      ))}
     </div>
   );
 };
 
 export default Employees;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState, useEffect } from 'react';
-
-// const employeesUrl = "https://rocky-temple-83495.herokuapp.com/employees";
-
-// const Employees = () => {
-//   const [data, setData] = useState([]);
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [totalPages, setTotalPages] = useState(1);
-
-//   useEffect(() => {
-//     fetchData();
-//   }, [currentPage]);
-
-//   const fetchData = async () => {
-//     try {
-//       const response = await fetch(`${employeesUrl}?_page=${currentPage}&_limit=10`);
-//       const jsonData = await response.json();
-//       setData(jsonData);
-//       // Extract total number of pages from response headers
-//       const totalCount = response.headers.get('X-Total-Count');
-//       const totalPagesCount = Math.ceil(totalCount / 10);
-//       setTotalPages(totalPagesCount);
-//     } catch (error) {
-//       console.log('Error fetching data:', error);
-//     }
-//   };
-
-//   const handlePreviousPage = () => {
-//     if (currentPage > 1) {
-//       setCurrentPage((prevPage) => prevPage - 1);
-//     }
-//   };
-
-//   const handleNextPage = () => {
-//     if (currentPage < totalPages) {
-//       setCurrentPage((prevPage) => prevPage + 1);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <div>
-//         <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-//           Previous
-//         </button>
-//         <button onClick={handleNextPage} disabled={currentPage === totalPages}>
-//           Next
-//         </button>
-//       </div>
-//       {data.map((item) => (
-//         <div key={item.id}>{item.name}</div>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default Employees;
