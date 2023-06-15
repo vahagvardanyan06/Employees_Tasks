@@ -77,6 +77,27 @@ const Employees = () => {
     }
   };
 
+  const handleUpdate = async (id, updatedData) => {
+    try {
+      const response = await fetch(`${employeesUrl}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        // Employee updated successfully, fetch updated data
+        fetchData();
+      } else {
+        console.log('Error updating employee:', response.status);
+      }
+    } catch (error) {
+      console.log('Error updating employee:', error);
+    }
+  };
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -123,6 +144,19 @@ const Employees = () => {
           <div key={employee.id}>
             <span>{employee.name} {employee.surname}</span>
             <button onClick={() => handleDelete(employee.id)}>Delete</button>
+            <button
+              onClick={() => {
+                const updatedData = {
+                  name: "Updated Name",
+                  surname: "Updated Surname",
+                  email: "updated@email.com",
+                  position: "Updated Position"
+                };
+                handleUpdate(employee.id, updatedData);
+              }}
+            >
+              Update
+            </button>
           </div>
         ))}
       </div>
